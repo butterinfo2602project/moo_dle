@@ -3,14 +3,11 @@ from typing import Optional
 from pydantic import EmailStr
 
 
-class UserBase(SQLModel):
+class AdminBase(SQLModel):
     username: str = Field(index=True, unique=True)
     email: EmailStr = Field(index=True, unique=True)
     password: str
-    role: str = ""
-    numGames: int = 0
-    gamesWon: int = 0
 
 
-class User(UserBase, table=True):
+class Admin(AdminBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
