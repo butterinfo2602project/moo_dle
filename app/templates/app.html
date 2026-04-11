@@ -12,6 +12,23 @@
             <p>
                 This is table is rendered on the Client. JavaScript code requests the data from <a href="/api/users">/api/users</a> and writes it to this page.
             </p>
+
+            <form method="POST" action="/app">
+
+            {% for i in range(4) %}
+                <input type="number" name="d{{ i }}" min="0" max="9" required>
+            {% endfor %}
+
+            <button type="submit">Submit</button>
+            </form>
+            
+            {% if guess %}
+            <p style="color: green;">You entered: {{ guess }}</p>
+            {% endif %}
+
+            {% if error %}
+                <p style="color: red;">{{ error }}</p>
+            {% endif %}
         </div>
         <div class="row">
             <table class="table table-striped">
