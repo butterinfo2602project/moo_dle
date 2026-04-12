@@ -11,16 +11,34 @@
         <div class="row">
             <h2>Daily Bulls and Cows</h2>
             <p>Guess the 4-digit number. All digits must be unique.</p>
-            
-            <form method="POST" action="/app">
-                {% for i in range(4) %}
-                    <input type="text" 
-                        name="d{{ i }}" 
-                        maxlength="1" required
-                        value="{{ form_values['d' + i|string] if form_values else '' }}">
-                {% endfor %}
-                <button type="submit">Submit</button>
-            </form>
+
+            {% if locked %}
+                <div class="alert alert-warning" style="margin-top: 10px;">
+                    Only one try per day, time left till next try:
+                    <br>
+                    <strong>{{ time_left }}</strong>
+                </div>
+
+                <form method="POST" action="/app">
+                    {% for i in range(4) %}
+                        <input type="text"
+                            name="d{{ i }}"
+                            maxlength="1"
+                            disabled>
+                    {% endfor %}
+                    <button type="submit" disabled>Submit</button>
+                </form>
+            {% else %}
+                <form method="POST" action="/app">
+                    {% for i in range(4) %}
+                        <input type="text" 
+                            name="d{{ i }}" 
+                            maxlength="1" required
+                            value="{{ form_values['d' + i|string] if form_values else '' }}">
+                    {% endfor %}
+                    <button type="submit">Submit</button>
+                </form>
+            {% endif %}
             
             {% if error %}
                 <div class="alert alert-danger" style="margin-top: 10px;">{{ error }}</div>
