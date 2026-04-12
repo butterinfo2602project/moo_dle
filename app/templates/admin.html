@@ -1,12 +1,68 @@
 {% extends "authenticated-base.html" %}
+{% block title %}LeaderBoard{% endblock %}
 
-{% block external_js %}
-<script src="{{ url_for('static', path='js/app.js')}}"></script>
+{% block internal_css %}
+<style>
+    .leader-title {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.35rem;
+    }
+
+    .leader-subtitle {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+    }
+
+    .leader-card {
+        background: #fff;
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    .table thead th {
+        color: #6b7280;
+        font-weight: 700;
+        border-bottom: 1px solid #e5e7eb;
+    }
+</style>
 {% endblock %}
 
-
 {% block subpage_content %}
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <h2 class="leader-title">LeaderBoard</h2>
+        <p class="leader-subtitle">Game results and standings.</p>
 
-   I am the admin page
-
+        <div class="leader-card">
+            {% if todos %}
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Name</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for todo in todos %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ todo.username if todo.username is defined else '-' }}</td>
+                                <td>{{ todo }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    No leaderboard data yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

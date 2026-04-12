@@ -1,133 +1,134 @@
 {% extends "base.html" %}
 
 {% block internal_css %}
-
 <style>
-    body {
-        overflow-x: hidden;
-        background-color: #f8f9fa;
-    }
-
-    #wrapper {
-        display: flex;
-    }
-
-    #sidebar {
-        min-width: 250px;
-        max-width: 250px;
+    .app-wrap {
         min-height: 100vh;
-        transition: all 0.3s;
-        background: #1b263b;
-        color: #fff;
+        padding: 24px;
     }
 
-    #sidebar.collapsed {
-        margin-left: -250px;
+    .app-layout {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 22px;
     }
 
-    #sidebar .nav-link {
-        color: #adb5bd;
-        font-weight: 500;
+    .side-bar {
+        background: linear-gradient(180deg, #111827, #1f2937);
+        color: white;
+        border-radius: 24px;
+        padding: 24px 18px;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.16);
+        height: fit-content;
+        position: sticky;
+        top: 24px;
     }
 
-    #sidebar .nav-link:hover,
-    #sidebar .nav-link.active {
-        color: #fff;
-        background-color: #415a77;
-        border-radius: 0.5rem;
+    .user-box {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 24px;
     }
 
-    #content {
-        width: 100%;
-        padding: 1rem;
-        transition: all 0.3s;
+    .user-name {
+        font-weight: 800;
+        font-size: 1.15rem;
+        margin-bottom: 4px;
+    }
+
+    .user-sub {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .side-links {
         display: flex;
         flex-direction: column;
-        background-color: #f8f9fa;
+        gap: 10px;
     }
 
-    .card {
-        border: none;
-        border-radius: 1rem;
+    .side-link {
+        text-decoration: none;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.06);
+        color: #e5e7eb;
+        transition: 0.2s ease;
+        display: block;
     }
 
-    .summary-card {
-        border-left: 5px solid #0d6efd;
+    .side-link:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: white;
     }
 
-    .navbar {
-        border-bottom: 1px solid #dee2e6;
+    .side-link.active {
+        background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+        color: white;
+    }
+
+    .logout-link {
+        margin-top: 24px;
+        display: block;
+        text-decoration: none;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-weight: 600;
+        background: rgba(239, 68, 68, 0.16);
+        color: #fecaca;
+    }
+
+    .logout-link:hover {
+        background: rgba(239, 68, 68, 0.24);
+        color: white;
+    }
+
+    .main-panel {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+        min-height: 80vh;
+    }
+
+    @media (max-width: 900px) {
+        .app-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .side-bar {
+            position: static;
+        }
     }
 </style>
 
 {% block additional_styles %}{% endblock %}
-
 {% endblock %}
 
-
 {% block content %}
-<div id="wrapper">
+<div class="app-wrap">
+    <div class="container-fluid">
+        <div class="app-layout">
+            <aside class="side-bar">
+                <div class="user-box">
+                    <div class="user-name">{{ user.username }}</div>
+                    <p class="user-sub">Daily Bulls and Cows</p>
+                </div>
 
-    <nav id="sidebar" class="p-3 d-flex flex-column vh-100">
-        <h4 class="text-white mb-4 text-center py-4">Bulls and Cows</h4>
+                <div class="side-links">
+                    <a href="/app" class="side-link {% if request.path == '/app' %}active{% endif %}">Game</a>
+                </div>
 
-        <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center {{ 'active' if request.path == '/app' }}" href="/app">
-                    <span class="material-symbols-outlined me-2">people</span>
-                    Users
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center {{ 'active' if request.path == '/history' }}" href="/app">
-                    <span class="material-symbols-outlined me-2">history</span>
-                    History
-                </a>
-            </li>
-            
-            <li class="nav-item mt-auto">
-                <a class="nav-link d-flex align-items-center text-danger" href="/logout">
-                    <span class="material-symbols-outlined me-2">logout</span>
-                    Logout
-                </a>
-            </li>
-        </ul>
-    </nav>
+                <a href="/logout" class="logout-link">Logout</a>
+            </aside>
 
-    <div id="content">
-        <nav class="navbar navbar-expand-lg bg-white mb-4 px-3 rounded-3 shadow-sm">
-            <button class="btn btn-outline-secondary" id="menu-toggle">
-                <span class="material-symbols-outlined md-dark">menu</span>
-            </button>
-
-            <div class="ms-auto d-flex align-items-center gap-3">
-                <span class="fw-semibold">Welcome, {{user.username}}</span>
-            </div>
-        </nav>
-        
-        <div class="row">
-            <div class="col-12">
-                {% for message in get_flashed_messages(request) %}
-                    <div class="alert alert-{{ message.type }}" role="alert">{{ message.message }}</div>
-                {% endfor %}
-            </div>
+            <main class="main-panel">
+                {% block subpage_content %}{% endblock %}
+            </main>
         </div>
-
-
-        {% block subpage_content %}{% endblock %}
-
     </div>
-
-
 </div>
-
-
-<script>
-    document.getElementById("menu-toggle").addEventListener("click", function () {
-        document.getElementById("sidebar").classList.toggle("collapsed");
-    });
-</script>
-
-{% block subpage_scripts %}{% endblock %}
-
 {% endblock %}

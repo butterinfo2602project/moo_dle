@@ -185,7 +185,9 @@ async def make_guess(
     db.add(guess)
     
     user_game.num_attempts += 1
-    success = f"You entered: {guess_str} - Bulls: {bulls}, Cows: {cows}"
+
+    # normal guesses should just show in the table, not an alert
+    success = None
     
     if bulls == 4:
         user_game.won = True
@@ -207,9 +209,6 @@ async def make_guess(
         db.add(leaderboard)
         db.commit()
         db.refresh(leaderboard)
-
-    """Figure out a system to increment numGames without winnin game, could add a give up button
-        will implement after eating"""
 
     db.commit()
     db.refresh(user_game)

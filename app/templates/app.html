@@ -4,80 +4,273 @@
 <script src="{{ url_for('static', path='js/app.js')}}"></script>
 {% endblock %}
 
+{% block additional_styles %}
+<style>
+    .game-page-title {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.35rem;
+        font-size: 2.2rem;
+    }
+
+    .game-subtitle {
+        color: #6b7280;
+        margin-bottom: 1.75rem;
+        font-size: 1.05rem;
+    }
+
+    .hero-panel {
+        background: linear-gradient(135deg, #ffffff, #f8fbff);
+        border-radius: 24px;
+        padding: 26px;
+        box-shadow: 0 16px 35px rgba(15, 23, 42, 0.06);
+        border: 1px solid #eef2f7;
+        margin-bottom: 24px;
+    }
+
+    /* same columns for header and rows so everything lines up */
+    .board-row {
+        display: grid;
+        grid-template-columns: repeat(4, 64px) 90px 90px;
+        gap: 14px;
+        align-items: center;
+    }
+
+    .board-header {
+        margin-bottom: 16px;
+    }
+
+    .secret-box {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #f4e18b, #ead36a);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #111827;
+        box-shadow:
+            inset 0 0 0 1px rgba(17, 24, 39, 0.06),
+            0 8px 18px rgba(234, 211, 106, 0.28);
+    }
+
+    .header-label {
+        font-weight: 800;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    .bulls-label {
+        color: #16a34a;
+    }
+
+    .cows-label {
+        color: #1d4ed8;
+    }
+
+    .digit-input {
+        width: 64px;
+        height: 64px;
+        border: none;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #f4e18b, #ead36a);
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #111827;
+        outline: none;
+        box-shadow:
+            inset 0 0 0 1px rgba(17, 24, 39, 0.06),
+            0 8px 18px rgba(234, 211, 106, 0.28);
+    }
+
+    .digit-input:focus {
+        box-shadow:
+            inset 0 0 0 2px #8b5cf6,
+            0 0 0 5px rgba(139, 92, 246, 0.10);
+    }
+
+    .guess-row {
+        margin-bottom: 14px;
+        padding: 10px 0;
+        border-top: 1px solid #edf2f7;
+    }
+
+    .guess-digit {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #f4e18b, #ead36a);
+        color: #111827;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 800;
+        box-shadow:
+            inset 0 0 0 1px rgba(17, 24, 39, 0.06),
+            0 8px 18px rgba(234, 211, 106, 0.28);
+    }
+
+    .score-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        text-align: center;
+    }
+
+    .bulls-value {
+        color: #16a34a;
+    }
+
+    .cows-value {
+        color: #1d4ed8;
+    }
+
+    .guess-btn-wrap {
+        margin-top: 12px;
+    }
+
+    .guess-btn {
+        border: none;
+        border-radius: 16px;
+        padding: 14px 26px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #b6e3af, #9dd99a);
+        color: #111827;
+        min-width: 140px;
+        box-shadow: 0 8px 18px rgba(157, 217, 154, 0.25);
+    }
+
+    .guess-btn:disabled {
+        opacity: 0.75;
+    }
+
+    .locked-box {
+        background: #fff7ed;
+        color: #9a3412;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+        font-weight: 600;
+    }
+
+    .error-box {
+        background: #fee2e2;
+        color: #991b1b;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-top: 18px;
+        font-weight: 600;
+    }
+
+    .win-box {
+        background: #dcfce7;
+        color: #166534;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-top: 18px;
+        font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+        .board-row {
+            grid-template-columns: repeat(4, 56px) 70px 70px;
+            gap: 10px;
+        }
+
+        .digit-input,
+        .guess-digit,
+        .secret-box {
+            width: 56px;
+            height: 56px;
+        }
+
+        .score-value,
+        .header-label {
+            font-size: 1.05rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block subpage_content %}
+<div class="row justify-content-center">
+    <div class="col-xl-11">
+        <h2 class="game-page-title">Daily Bulls and Cows</h2>
+        <p class="game-subtitle">Guess the 4-digit number. All digits must be unique.</p>
 
-    <div class="container" id="content">
-        <div class="row">
-            <h2>Daily Bulls and Cows</h2>
-            <p>Guess the 4-digit number. All digits must be unique.</p>
-
+        <div class="hero-panel">
             {% if locked %}
-                <div class="alert alert-warning" style="margin-top: 10px;">
+                <div class="locked-box">
                     Only one try per day, time left till next try:
                     <br>
                     <strong>{{ time_left }}</strong>
                 </div>
+            {% endif %}
 
+            <div class="board-row board-header">
+                {% for i in range(4) %}
+                    <div class="secret-box">?</div>
+                {% endfor %}
+                <div class="header-label bulls-label">Bulls</div>
+                <div class="header-label cows-label">Cows</div>
+            </div>
+
+            {% if guesses %}
+                {% for g in guesses|reverse %}
+                    <div class="board-row guess-row">
+                        {% for ch in g.guess_number %}
+                            <div class="guess-digit">{{ ch }}</div>
+                        {% endfor %}
+                        <div class="score-value bulls-value">{{ g.bulls }}</div>
+                        <div class="score-value cows-value">{{ g.cows }}</div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if locked %}
                 <form method="POST" action="/app">
-                    {% for i in range(4) %}
-                        <input type="text"
-                            name="d{{ i }}"
-                            maxlength="1"
-                            disabled>
-                    {% endfor %}
-                    <button type="submit" disabled>Submit</button>
+                    <div class="board-row">
+                        {% for i in range(4) %}
+                            <input type="text" class="digit-input" name="d{{ i }}" disabled>
+                        {% endfor %}
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <div class="guess-btn-wrap">
+                        <button type="submit" class="guess-btn" disabled>Guess</button>
+                    </div>
                 </form>
             {% else %}
                 <form method="POST" action="/app">
-                    {% for i in range(4) %}
-                        <input type="text" 
-                            name="d{{ i }}" 
-                            maxlength="1" required
-                            value="{{ form_values['d' + i|string] if form_values else '' }}">
-                    {% endfor %}
-                    <button type="submit">Submit</button>
+                    <div class="board-row">
+                        {% for i in range(4) %}
+                            <input type="text"
+                                class="digit-input"
+                                name="d{{ i }}"
+                                maxlength="1"
+                                required
+                                value="{{ form_values['d' + i|string] if form_values else '' }}">
+                        {% endfor %}
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <div class="guess-btn-wrap">
+                        <button type="submit" class="guess-btn">Guess</button>
+                    </div>
                 </form>
             {% endif %}
-            
+
             {% if error %}
-                <div class="alert alert-danger" style="margin-top: 10px;">{{ error }}</div>
+                <div class="error-box">{{ error }}</div>
             {% endif %}
-            
+
             {% if success %}
-                <div class="alert alert-success" style="margin-top: 10px;">{{ success }}</div>
+                <div class="win-box">{{ success }}</div>
             {% endif %}
-            
-        
-            {% if guesses %}
-            <div>
-                <h4>Your Guesses:</h4>
-                
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Guess</th>
-                            <th>Bulls</th>
-                            <th>Cows</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for g in guesses|reverse %}
-                        <tr>
-                            <td>{{ g.guess_number }}</td>
-                            <td>{{ g.bulls }}</td>
-                            <td>{{ g.cows }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endif %}
-            
-            <!-- for testing remove after -->
-            <!-- <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <a href="/app/nuke" class="btn btn-danger btn-sm">delete data</a>
-            </div> -->
         </div>
-    </div> 
+    </div>
+</div>
 {% endblock %}
