@@ -4,6 +4,7 @@ from fastapi import status, Form
 from app.dependencies.session import SessionDep
 from app.dependencies.auth import AuthDep, IsUserLoggedIn, get_current_user, is_admin
 from app.models.game import DailyGame, UserGame, Guess
+from app.models import Leaderboard
 from . import router, templates
 from sqlmodel import select, delete
 from datetime import date as date_type
@@ -39,7 +40,7 @@ async def user_home_view(
     
     daily_game = db.exec(select(DailyGame).where(DailyGame.game_date == today)).first()
     if not daily_game:
-        daily_game = DailyGame(game_date=today, secret_number=generate_secret_number())
+        daily_game = DailyGame(game_date=today, secret_number=generate_secret_number()) 
         db.add(daily_game)
         db.commit()
         db.refresh(daily_game)
@@ -165,7 +166,27 @@ async def make_guess(
         user_game.won = True
         user_game.completed = True
         success = f"You won! The number was {guess_str}"
-    
+
+        #increments gamesWon in user table 
+        user.gamesWon += 1
+
+        #creates leadboard and populates data when game is won
+        leaderboard = Leaderboard(
+            user_id=user.id,
+            game_id= daily_game.id,
+            username=user.username,
+            gamesWon=user.gamesWon,
+            numAttempts=user_game.num_attempts
+        )
+
+        db.add(leaderboard)
+        db.commit()
+        db.refresh(leaderboard)
+
+    """Figure out a system to increment numGames without winnin game, could add a give up button
+        will implement after eating"""
+
+
     db.commit()
     db.refresh(user_game)
     
@@ -187,7 +208,7 @@ async def make_guess(
 async def nuke_data(db: SessionDep, user: AuthDep):
     
 
-    #just so I can test things
+    #just so I can test things(Kayden- i wanna make this an adim function)
     db.exec(delete(Guess))
     db.exec(delete(UserGame))
     db.exec(delete(DailyGame))
