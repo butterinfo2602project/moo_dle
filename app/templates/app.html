@@ -9,39 +9,57 @@
 
     <div class="container" id="content">
         <div class="row">
-            <p>
-                This is table is rendered on the Client. JavaScript code requests the data from <a href="/api/users">/api/users</a> and writes it to this page.
-            </p>
-
+            <h2>Daily Bulls and Cows</h2>
+            <p>Guess the 4-digit number. All digits must be unique.</p>
+            
             <form method="POST" action="/app">
-
-            {% for i in range(4) %}
-                <input type="number" name="d{{ i }}" min="0" max="9" required>
-            {% endfor %}
-
-            <button type="submit">Submit</button>
+                {% for i in range(4) %}
+                    <input type="text" 
+                        name="d{{ i }}" 
+                        maxlength="1" required
+                        value="{{ form_values['d' + i|string] if form_values else '' }}">
+                {% endfor %}
+                <button type="submit">Submit</button>
             </form>
             
-            {% if guess %}
-            <p style="color: green;">You entered: {{ guess }}</p>
-            {% endif %}
-
             {% if error %}
-                <p style="color: red;">{{ error }}</p>
+                <div class="alert alert-danger" style="margin-top: 10px;">{{ error }}</div>
             {% endif %}
-        </div>
-        <div class="row">
-            <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Id</th><th>Username</th>
-                  </tr>
-                </thead>
-                <tbody id="result">
+            
+            {% if success %}
+                <div class="alert alert-success" style="margin-top: 10px;">{{ success }}</div>
+            {% endif %}
+            
+        
+            {% if guesses %}
+            <div>
+                <h4>Your Guesses:</h4>
                 
-                <tbody>
-            </table>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Guess</th>
+                            <th>Bulls</th>
+                            <th>Cows</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for g in guesses|reverse %}
+                        <tr>
+                            <td>{{ g.guess_number }}</td>
+                            <td>{{ g.bulls }}</td>
+                            <td>{{ g.cows }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            
+            <!-- for testing remove after -->
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <a href="/app/nuke" class="btn btn-danger btn-sm">delete data</a>
+            </div>
         </div>
-    </div>
-
+    </div> 
 {% endblock %}
