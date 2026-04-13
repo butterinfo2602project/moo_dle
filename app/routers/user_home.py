@@ -96,6 +96,7 @@ async def make_guess(
     request: Request,
     db: SessionDep,
     user: AuthDep,
+    action: str = Form(...),
     d0: int = Form(),
     d1: int = Form(),
     d2: int = Form(),
@@ -186,6 +187,22 @@ async def make_guess(
     
     user_game.num_attempts += 1
 
+    if action == "giveup":
+        user_game = handle_give_up(db, user)
+
+        return templates.TemplateResponse(
+            request=request,
+            name="app.html",
+            context={
+                "user": user,
+                "guesses": user_game.guesses,
+                "user_game": user_game,
+                "locked": True,
+                "time_left": get_time_left(),
+                "success": "You gave up!"
+            }
+        )
+
     # normal guesses should just show in the table, not an alert
     success = None
     
@@ -194,8 +211,10 @@ async def make_guess(
         user_game.completed = True
         success = f"You won! The number was {guess_str}"
 
-        # increments games won in user table
+        # increments games won and num games in user table
         user.gamesWon += 1
+        user.numGames += 1
+
 
         # adds win to leaderboard
         leaderboard = Leaderboard(
@@ -227,6 +246,47 @@ async def make_guess(
     )
 
 
+def handle_give_up(db: SessionDep, user: AuthDep):
+    today = date_type.today()
+
+    daily_game = db.exec(
+        select(DailyGame).where(DailyGame.game_date == today)
+    ).first()
+
+    if not daily_game:
+        raise HTTPException(status_code=404, detail="Game not found")
+
+    user_game = db.exec(
+        select(UserGame).where(
+            UserGame.user_id == user.id,
+            UserGame.daily_game_id == daily_game.id
+        )
+    ).first()
+
+    if not user_game:
+        user_game = UserGame(
+            user_id=user.id,
+            daily_game_id=daily_game.id,
+            num_attempts=0
+        )
+        db.add(user_game)
+
+    # prevent double-processing
+    if user_game.completed:
+        return user_game
+
+    user_game.completed = True
+    user_game.won = False
+
+    user.numGames += 1
+
+    db.add(user_game)
+    db.commit()
+    db.refresh(user_game)
+
+    return user_game
+
+
 @router.get("/app/nuke")
 async def nuke_data(db: SessionDep, user: AuthDep):
     
@@ -234,6 +294,7 @@ async def nuke_data(db: SessionDep, user: AuthDep):
     db.exec(delete(Guess))
     db.exec(delete(UserGame))
     db.exec(delete(DailyGame))
+    db.exec(delete(Leaderboard))
     
     db.commit()
     
