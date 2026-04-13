@@ -1,0 +1,76 @@
+{% extends "authenticated-base.html" %}
+
+{% block subpage_content %}
+<div class="container mt-4">
+
+    <h2 class="text-center mb-3">Leaderboard</h2>
+
+
+    <div class="text-center mb-4">
+        <button class="btn btn-primary me-2" onclick="showDaily()">Daily</button>
+        <button class="btn btn-outline-light" onclick="showLifetime()">Lifetime</button>
+    </div>
+
+  
+    <div id="daily-board">
+        <h5 class="text-center mb-3">Daily Attempts</h5>
+
+        <table class="table text-center">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Attempts</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in daily_leaderboard %}
+                <tr>
+                    <td>{{ player.rank }}</td>
+                    <td>{{ player.username }}</td>
+                    <td>{{ player.attempts }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div id="lifetime-board" style="display:none;">
+        <h5 class="text-center mb-3">All-Time Wins</h5>
+
+        <table class="table text-center">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Wins</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in lifetime_leaderboard %}
+                <tr>
+                    <td>{{ player.rank }}</td>
+                    <td>{{ player.username }}</td>
+                    <td>{{ player.wins }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+function showDaily() {
+    document.getElementById("daily-board").style.display = "block";
+    document.getElementById("lifetime-board").style.display = "none";
+}
+
+function showLifetime() {
+    document.getElementById("daily-board").style.display = "none";
+    document.getElementById("lifetime-board").style.display = "block";
+}
+</script>
+
+{% endblock %}
