@@ -28,7 +28,6 @@
         margin-bottom: 24px;
     }
 
-    /* same columns for header and rows so everything lines up */
     .board-row {
         display: grid;
         grid-template-columns: repeat(4, 64px) 90px 90px;
@@ -130,6 +129,9 @@
 
     .guess-btn-wrap {
         margin-top: 12px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
     .guess-btn {
@@ -137,13 +139,41 @@
         border-radius: 16px;
         padding: 14px 26px;
         font-weight: 800;
-        background: linear-gradient(135deg, #b6e3af, #9dd99a);
-        color: #111827;
         min-width: 140px;
         box-shadow: 0 8px 18px rgba(157, 217, 154, 0.25);
+        transition: 0.2s ease;
     }
 
-    .guess-btn:disabled {
+    .guess-btn-main {
+        background: linear-gradient(135deg, #b6e3af, #9dd99a);
+        color: #111827;
+    }
+
+    .guess-btn-main:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 22px rgba(157, 217, 154, 0.32);
+    }
+
+    .give-up-btn {
+        border: none;
+        border-radius: 16px;
+        padding: 14px 26px;
+        font-weight: 800;
+        min-width: 140px;
+        background: linear-gradient(135deg, #fecaca, #fca5a5);
+        color: #7f1d1d;
+        box-shadow: 0 8px 18px rgba(252, 165, 165, 0.25);
+        transition: 0.2s ease;
+    }
+
+    .give-up-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 22px rgba(252, 165, 165, 0.32);
+        color: #7f1d1d;
+    }
+
+    .guess-btn:disabled,
+    .give-up-btn:disabled {
         opacity: 0.75;
     }
 
@@ -240,7 +270,7 @@
                         <div></div>
                     </div>
                     <div class="guess-btn-wrap">
-                        <button type="submit" class="guess-btn" disabled>Guess</button>
+                        <button type="submit" name="action" value="guess" class="guess-btn guess-btn-main" disabled>Guess</button>
                     </div>
                 </form>
             {% else %}
@@ -251,17 +281,15 @@
                                 class="digit-input"
                                 name="d{{ i }}"
                                 maxlength="1"
-                                required
                                 value="{{ form_values['d' + i|string] if form_values else '' }}">
                         {% endfor %}
                         <div></div>
                         <div></div>
                     </div>
+
                     <div class="guess-btn-wrap">
-                        <button type="submit" class="guess-btn">Guess</button>
-                    </div>
-                    <div class="guess-btn-wrap">
-                       <button type="submit" name="action" value="giveup">Give Up</button>
+                        <button type="submit" name="action" value="guess" class="guess-btn guess-btn-main">Guess</button>
+                        <button type="submit" name="action" value="giveup" class="give-up-btn">Give Up</button>
                     </div>
                 </form>
             {% endif %}

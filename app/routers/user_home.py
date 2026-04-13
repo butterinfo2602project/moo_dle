@@ -96,11 +96,11 @@ async def make_guess(
     request: Request,
     db: SessionDep,
     user: AuthDep,
-    action: str = Form(...),
-    d0: int = Form(),
-    d1: int = Form(),
-    d2: int = Form(),
-    d3: int = Form()
+    action: str = Form("guess"),
+    d0: int | None = Form(None),
+    d1: int | None = Form(None),
+    d2: int | None = Form(None),
+    d3: int | None = Form(None)
 ):
     today = date_type.today()
 
@@ -137,6 +137,44 @@ async def make_guess(
                 "user_game": user_game,
                 "locked": True,
                 "time_left": get_time_left()
+            }
+        )
+
+    # handle give up before checking the inputs
+    if action == "giveup":
+        user_game = handle_give_up(db, user)
+
+        return templates.TemplateResponse(
+            request=request,
+            name="app.html",
+            context={
+                "user": user,
+                "guesses": user_game.guesses,
+                "user_game": user_game,
+                "locked": True,
+                "time_left": get_time_left(),
+                "success": "You gave up!"
+            }
+        )
+
+    # normal guess must have all 4 boxes filled
+    if d0 is None or d1 is None or d2 is None or d3 is None:
+        return templates.TemplateResponse(
+            request=request,
+            name="app.html",
+            context={
+                "user": user,
+                "error": "Please fill in all 4 boxes",
+                "guesses": user_game.guesses,
+                "user_game": user_game,
+                "locked": False,
+                "time_left": None,
+                "form_values": {
+                    "d0": "" if d0 is None else d0,
+                    "d1": "" if d1 is None else d1,
+                    "d2": "" if d2 is None else d2,
+                    "d3": "" if d3 is None else d3
+                }
             }
         )
 
@@ -187,22 +225,6 @@ async def make_guess(
     
     user_game.num_attempts += 1
 
-    if action == "giveup":
-        user_game = handle_give_up(db, user)
-
-        return templates.TemplateResponse(
-            request=request,
-            name="app.html",
-            context={
-                "user": user,
-                "guesses": user_game.guesses,
-                "user_game": user_game,
-                "locked": True,
-                "time_left": get_time_left(),
-                "success": "You gave up!"
-            }
-        )
-
     # normal guesses should just show in the table, not an alert
     success = None
     
@@ -214,7 +236,6 @@ async def make_guess(
         # increments games won and num games in user table
         user.gamesWon += 1
         user.numGames += 1
-
 
         # adds win to leaderboard
         leaderboard = Leaderboard(
