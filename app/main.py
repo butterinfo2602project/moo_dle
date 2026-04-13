@@ -5,14 +5,30 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.routers import templates, static_files, router, api_router
 from app.config import get_settings
 from contextlib import asynccontextmanager
+from app.database import create_db_and_tables, get_cli_session
+from app.database import Session, engine
+from app.repositories.user import UserRepository
+from app.services.auth_service import AuthService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from app.database import create_db_and_tables
     create_db_and_tables()
-    yield
 
+    with Session(engine) as db:
+        user_repo = UserRepository(db)
+        auth_service = AuthService(user_repo)
+
+        try:
+            auth_service.register_user(
+                username="bob",
+                email="bob@mail.com",
+                password="bobpass"
+            )
+        except Exception:
+            print("(ignored)")
+
+    yield
 
 
 app = FastAPI(middleware=[

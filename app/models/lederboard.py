@@ -5,7 +5,7 @@ from datetime import date
 
 class LeaderboardBase(SQLModel):
     user_id: int = Field(foreign_key="user.id")
-    game_id: int = Field(foreign_key="game.id")
+    game_id: int = Field(foreign_key="dailygame.id")
     username: str 
     gamesWon: int
     numAttempts: int
