@@ -1,0 +1,145 @@
+{% extends "authenticated-base.html" %}
+
+{% block additional_styles %}
+<style>
+    .history-title {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.3rem;
+        font-size: 1.85rem;
+    }
+
+    .history-subtitle {
+        color: var(--text-muted);
+        margin-bottom: 1.3rem;
+        font-size: 0.98rem;
+    }
+
+    .history-card {
+        background: linear-gradient(135deg, #141c2b, #182235);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+        border: 1px solid var(--card-border);
+    }
+
+    .table-responsive {
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.04);
+        --bs-table-color: var(--text-main);
+        --bs-table-border-color: #243041;
+        color: var(--text-main);
+        margin-bottom: 0;
+    }
+
+    .table thead {
+        background: #1b2436;
+    }
+
+    .table thead th {
+        color: var(--text-muted);
+        font-weight: 700;
+        border-bottom: 1px solid #243041;
+        font-size: 0.94rem;
+        padding: 14px 16px;
+        background: #1b2436;
+    }
+
+    .table tbody tr {
+        background: #111827;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        font-weight: 500;
+        font-size: 0.94rem;
+        border-color: #243041;
+        padding: 14px 16px;
+        background: #111827;
+        color: var(--text-main);
+    }
+
+    .won-badge {
+        background: var(--success-soft);
+        color: var(--success-text);
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+        display: inline-block;
+        font-size: 0.84rem;
+    }
+
+    .lost-badge {
+        background: var(--danger-soft);
+        color: var(--danger-text);
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+        display: inline-block;
+        font-size: 0.84rem;
+    }
+
+    .empty-box {
+        background: #111827;
+        border: 1px solid #243041;
+        border-radius: 14px;
+        padding: 20px;
+        text-align: center;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
+
+{% block subpage_content %}
+<div class="row justify-content-center">
+    <div class="col-xl-11">
+        <h2 class="history-title">Game History</h2>
+        <p class="history-subtitle">Your completed daily games.</p>
+
+        <div class="history-card">
+            {% if history_items %}
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Winning Code</th>
+                                <th>Outcome</th>
+                                <th>Attempts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in history_items %}
+                            <tr>
+                                <td>{{ item.date }}</td>
+                                <td>{{ item.winning_code }}</td>
+                                <td>
+                                    {% if item.outcome == "Won" %}
+                                        <span class="won-badge">Won</span>
+                                    {% else %}
+                                        <span class="lost-badge">Lost</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.attempts }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-box">
+                    No completed games yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

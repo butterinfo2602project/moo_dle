@@ -17,79 +17,112 @@
         rel="stylesheet">
 
     <style>
+        :root {
+            --bg-main: #0b1120;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.92);
+            --bg-card-soft: rgba(30, 41, 59, 0.92);
+            --card-border: #243041;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-main: #7c3aed;
+            --accent-dark: #3b82f6;
+            --success-soft: #052e16;
+            --success-text: #86efac;
+            --danger-soft: #450a0a;
+            --danger-text: #fca5a5;
+            --warn-soft: #431407;
+            --warn-text: #fdba74;
+            --yellow-top: #f6e58d;
+            --yellow-bottom: #e7c95d;
+            --shadow-main: 0 18px 36px rgba(0, 0, 0, 0.35);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(124, 58, 237, 0.08), transparent 25%),
-                radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.08), transparent 25%),
-                #f5f7fb;
-            color: #111827;
+                radial-gradient(circle at top left, rgba(124, 58, 237, 0.13), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 24%),
+                var(--bg-main);
+            color: var(--text-main);
         }
 
         .page-shell {
             min-height: 100vh;
-            padding: 32px;
+            padding: 24px;
         }
 
         .main-card {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            box-shadow: var(--shadow-main);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
 
         .soft-card {
-            border: none;
-            border-radius: 20px;
-            background: #ffffff;
-            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            background: var(--bg-card-soft);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
         }
 
         .form-control {
-            min-height: 50px;
-            border-radius: 14px;
-            border: 1px solid #d1d5db;
-            padding: 0.8rem 1rem;
+            min-height: 46px;
+            border-radius: 12px;
+            border: 1px solid #374151;
+            background: #0f172a;
+            color: var(--text-main);
+            padding: 0.75rem 0.95rem;
+            font-size: 0.96rem;
+        }
+
+        .form-control::placeholder {
+            color: #6b7280;
         }
 
         .form-control:focus {
-            border-color: #8b5cf6;
-            box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.12);
+            background: #111827;
+            color: var(--text-main);
+            border-color: var(--accent-main);
+            box-shadow: 0 0 0 0.18rem rgba(124, 58, 237, 0.18);
         }
 
         .btn-main {
             border: none;
-            border-radius: 14px;
-            min-height: 48px;
-            font-weight: 600;
-            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+            border-radius: 12px;
+            min-height: 44px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
             color: white;
         }
 
         .btn-main:hover {
             color: white;
-            opacity: 0.95;
+            opacity: 0.96;
         }
 
         .btn-lightish {
             border: none;
-            border-radius: 14px;
-            min-height: 48px;
-            font-weight: 600;
-            background: #eef2ff;
-            color: #312e81;
+            border-radius: 12px;
+            min-height: 44px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            background: #1e293b;
+            color: #dbeafe;
         }
 
         .btn-lightish:hover {
-            background: #e0e7ff;
-            color: #312e81;
+            background: #273449;
+            color: #dbeafe;
         }
 
         .alert {
             border: none;
-            border-radius: 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
         }
 
         .page-title {
@@ -98,7 +131,16 @@
         }
 
         .muted-text {
-            color: #6b7280;
+            color: var(--text-muted);
+        }
+
+        .badge-soft {
+            background: #1e293b;
+            color: #c4b5fd;
+            border-radius: 999px;
+            padding: 0.45rem 0.8rem;
+            font-weight: 700;
+            font-size: 0.82rem;
         }
     </style>
 

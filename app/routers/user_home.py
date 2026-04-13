@@ -10,15 +10,6 @@ from sqlmodel import select, delete
 from datetime import date as date_type, datetime, timedelta
 import random
 
-"""Todo List:
-        still needs to implement the actual game model for history
-        hide the inputs when the game has been finished for the day(maybe a countdown)
-        remove delete data button
-        dont use session, it's not restful
-        gotta change it so that when other chars are entered, the history still shows
-        make it so that when you refresh it doesn't re-enter it
-"""
-
 def generate_secret_number() -> str:
     digits = random.sample(range(10), 4)
     return "".join(map(str, digits))
@@ -70,7 +61,6 @@ async def user_home_view(
         )
     ).first()
 
-    # checks if today's game is already finished
     locked = False
     time_left = None
 
@@ -91,6 +81,51 @@ async def user_home_view(
     )
 
 
+@router.get("/history", response_class=HTMLResponse)
+async def history_view(
+    request: Request,
+    user: AuthDep,
+    db: SessionDep
+):
+    # get completed games for this user
+    user_games = db.exec(
+        select(UserGame).where(
+            UserGame.user_id == user.id,
+            UserGame.completed == True
+        )
+    ).all()
+
+    history_items = []
+
+    for game in user_games:
+        daily_game = db.exec(
+            select(DailyGame).where(DailyGame.id == game.daily_game_id)
+        ).first()
+
+        history_items.append({
+            "date": daily_game.game_date if daily_game else None,
+            "winning_code": daily_game.secret_number if daily_game else "----",
+            "outcome": "Won" if game.won else "Lost",
+            "attempts": game.num_attempts
+        })
+
+    # newest first
+    history_items = sorted(
+        history_items,
+        key=lambda item: item["date"],
+        reverse=True
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="history.html",
+        context={
+            "user": user,
+            "history_items": history_items
+        }
+    )
+
+
 @router.post("/app", response_class=HTMLResponse)
 async def make_guess(
     request: Request,
@@ -104,7 +139,6 @@ async def make_guess(
 ):
     today = date_type.today()
 
-    # get or create today's game
     daily_game = db.exec(select(DailyGame).where(DailyGame.game_date == today)).first()
     if not daily_game:
         daily_game = DailyGame(game_date=today, secret_number=generate_secret_number())
@@ -125,7 +159,6 @@ async def make_guess(
         db.commit()
         db.refresh(user_game)
 
-    # blocks user from trying again after today's game is done
     if user_game.completed:
         return templates.TemplateResponse(
             request=request,
@@ -140,7 +173,6 @@ async def make_guess(
             }
         )
 
-    # handle give up before checking the inputs
     if action == "giveup":
         user_game = handle_give_up(db, user)
 
@@ -157,7 +189,6 @@ async def make_guess(
             }
         )
 
-    # normal guess must have all 4 boxes filled
     if d0 is None or d1 is None or d2 is None or d3 is None:
         return templates.TemplateResponse(
             request=request,
@@ -178,21 +209,7 @@ async def make_guess(
             }
         )
 
-    try:
-        digits = [d0, d1, d2, d3]
-    except ValueError:
-        return templates.TemplateResponse(
-            request=request,
-            name="app.html",
-            context={
-                "user": user,
-                "error": "Please enter numbers only",
-                "guesses": user_game.guesses,
-                "user_game": user_game,
-                "locked": False,
-                "time_left": None
-            }
-        )
+    digits = [d0, d1, d2, d3]
     
     if len(set(digits)) != 4:
         return templates.TemplateResponse(
@@ -211,10 +228,8 @@ async def make_guess(
     
     guess_str = "".join(map(str, digits))
     
-    # number placement
     bulls, cows = calculate_bulls_and_cows(guess_str, daily_game.secret_number)
     
-    # create guess
     guess = Guess(
         user_game_id=user_game.id,
         guess_number=guess_str,
@@ -224,8 +239,6 @@ async def make_guess(
     db.add(guess)
     
     user_game.num_attempts += 1
-
-    # normal guesses should just show in the table, not an alert
     success = None
     
     if bulls == 4:
@@ -233,11 +246,9 @@ async def make_guess(
         user_game.completed = True
         success = f"You won! The number was {guess_str}"
 
-        # increments games won and num games in user table
         user.gamesWon += 1
         user.numGames += 1
 
-        # adds win to leaderboard
         leaderboard = Leaderboard(
             user_id=user.id,
             game_id=daily_game.id,
@@ -292,13 +303,11 @@ def handle_give_up(db: SessionDep, user: AuthDep):
         )
         db.add(user_game)
 
-    # prevent double-processing
     if user_game.completed:
         return user_game
 
     user_game.completed = True
     user_game.won = False
-
     user.numGames += 1
 
     db.add(user_game)
@@ -310,8 +319,6 @@ def handle_give_up(db: SessionDep, user: AuthDep):
 
 @router.get("/app/nuke")
 async def nuke_data(db: SessionDep, user: AuthDep):
-    
-    # just so I can test things(Kayden- i wanna make this an adim function)
     db.exec(delete(Guess))
     db.exec(delete(UserGame))
     db.exec(delete(DailyGame))
