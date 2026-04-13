@@ -341,16 +341,16 @@ def handle_give_up(db: SessionDep, user: AuthDep):
     return user_game
 
 
-@router.get("/app/nuke")
-async def nuke_data(db: SessionDep, user: AuthDep):
-    db.exec(delete(Guess))
-    db.exec(delete(UserGame))
-    db.exec(delete(DailyGame))
-    db.exec(delete(Leaderboard))
+# @router.get("/app/nuke")
+# async def nuke_data(db: SessionDep, user: AuthDep):
+#     db.exec(delete(Guess))
+#     db.exec(delete(UserGame))
+#     db.exec(delete(DailyGame))
+#     db.exec(delete(Leaderboard))
     
-    db.commit()
+#     db.commit()
     
-    return RedirectResponse(url="/app", status_code=303)
+#     return RedirectResponse(url="/app", status_code=303)
 
 
 
