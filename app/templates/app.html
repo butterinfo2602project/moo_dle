@@ -245,7 +245,7 @@
             </div>
 
             {% if guesses %}
-                {% for g in guesses|reverse %}
+                {% for g in guesses %}
                     <div class="board-row guess-row">
                         {% for ch in g.guess_number %}
                             <div class="guess-digit">{{ ch }}</div>
