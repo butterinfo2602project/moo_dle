@@ -1,76 +1,218 @@
 {% extends "authenticated-base.html" %}
 
+{% block additional_styles %}
+<style>
+    .leaderboard-title {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.3rem;
+        font-size: 1.95rem;
+        text-align: center;
+    }
+
+    .leaderboard-subtitle {
+        color: var(--text-muted);
+        margin-bottom: 1.2rem;
+        font-size: 0.98rem;
+        text-align: center;
+    }
+
+    .toggle-wrap {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .toggle-btn {
+        border: 1px solid #334155;
+        background: #111827;
+        color: var(--text-main);
+        border-radius: 12px;
+        padding: 9px 16px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .toggle-btn.active {
+        background: linear-gradient(135deg, var(--accent-main), var(--accent-dark));
+        color: white;
+        border-color: transparent;
+    }
+
+    .leaderboard-card {
+        background: linear-gradient(135deg, #141c2b, #182235);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+        border: 1px solid var(--card-border);
+    }
+
+    .board-section-title {
+        text-align: center;
+        font-weight: 800;
+        margin-bottom: 14px;
+        font-size: 1.15rem;
+    }
+
+    .table-responsive {
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.04);
+        --bs-table-color: var(--text-main);
+        --bs-table-border-color: #243041;
+        color: var(--text-main);
+        margin-bottom: 0;
+    }
+
+    .table thead {
+        background: #1b2436;
+    }
+
+    .table thead th {
+        color: var(--text-muted);
+        font-weight: 700;
+        border-bottom: 1px solid #243041;
+        font-size: 0.94rem;
+        padding: 14px 16px;
+        background: #1b2436;
+        text-align: center;
+    }
+
+    .table tbody tr {
+        background: #111827;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        font-weight: 500;
+        font-size: 0.94rem;
+        border-color: #243041;
+        padding: 14px 16px;
+        background: #111827;
+        color: var(--text-main);
+        text-align: center;
+    }
+
+    .empty-box {
+        background: #111827;
+        border: 1px solid #243041;
+        border-radius: 14px;
+        padding: 20px;
+        text-align: center;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .hidden-board {
+        display: none;
+    }
+</style>
+{% endblock %}
+
 {% block subpage_content %}
-<div class="container mt-4">
+<div class="row justify-content-center">
+    <div class="col-xl-11">
+        <h2 class="leaderboard-title">Leaderboard</h2>
+        <p class="leaderboard-subtitle">See today’s attempts or total wins.</p>
 
-    <h2 class="text-center mb-3">Leaderboard</h2>
+        <div class="toggle-wrap">
+            <button class="toggle-btn active" id="dailyBtn" type="button" onclick="showBoard('daily')">Daily</button>
+            <button class="toggle-btn" id="lifetimeBtn" type="button" onclick="showBoard('lifetime')">Lifetime</button>
+        </div>
 
+        <div class="leaderboard-card">
+            <div id="dailyBoard">
+                <h4 class="board-section-title">Daily Attempts</h4>
 
-    <div class="text-center mb-4">
-        <button class="btn btn-primary me-2" onclick="showDaily()">Daily</button>
-        <button class="btn btn-outline-light" onclick="showLifetime()">Lifetime</button>
+                {% if daily_leaderboard %}
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Username</th>
+                                    <th>Attempts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in daily_leaderboard %}
+                                <tr>
+                                    <td>{{ entry.rank }}</td>
+                                    <td>{{ entry.username }}</td>
+                                    <td>{{ entry.attempts }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-box">
+                        No leaderboard data yet.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div id="lifetimeBoard" class="hidden-board">
+                <h4 class="board-section-title">Lifetime Wins</h4>
+
+                {% if lifetime_leaderboard %}
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Username</th>
+                                    <th>Wins</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in lifetime_leaderboard %}
+                                <tr>
+                                    <td>{{ entry.rank }}</td>
+                                    <td>{{ entry.username }}</td>
+                                    <td>{{ entry.wins }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-box">
+                        No leaderboard data yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
-
-  
-    <div id="daily-board">
-        <h5 class="text-center mb-3">Daily Attempts</h5>
-
-        <table class="table text-center">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Username</th>
-                    <th>Attempts</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in daily_leaderboard %}
-                <tr>
-                    <td>{{ player.rank }}</td>
-                    <td>{{ player.username }}</td>
-                    <td>{{ player.attempts }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-
-    <div id="lifetime-board" style="display:none;">
-        <h5 class="text-center mb-3">All-Time Wins</h5>
-
-        <table class="table text-center">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Username</th>
-                    <th>Wins</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in lifetime_leaderboard %}
-                <tr>
-                    <td>{{ player.rank }}</td>
-                    <td>{{ player.username }}</td>
-                    <td>{{ player.wins }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
 </div>
 
 <script>
-function showDaily() {
-    document.getElementById("daily-board").style.display = "block";
-    document.getElementById("lifetime-board").style.display = "none";
-}
+    function showBoard(type) {
+        const dailyBoard = document.getElementById("dailyBoard");
+        const lifetimeBoard = document.getElementById("lifetimeBoard");
+        const dailyBtn = document.getElementById("dailyBtn");
+        const lifetimeBtn = document.getElementById("lifetimeBtn");
 
-function showLifetime() {
-    document.getElementById("daily-board").style.display = "none";
-    document.getElementById("lifetime-board").style.display = "block";
-}
+        if (type === "daily") {
+            dailyBoard.classList.remove("hidden-board");
+            lifetimeBoard.classList.add("hidden-board");
+            dailyBtn.classList.add("active");
+            lifetimeBtn.classList.remove("active");
+        } else {
+            lifetimeBoard.classList.remove("hidden-board");
+            dailyBoard.classList.add("hidden-board");
+            lifetimeBtn.classList.add("active");
+            dailyBtn.classList.remove("active");
+        }
+    }
 </script>
-
 {% endblock %}

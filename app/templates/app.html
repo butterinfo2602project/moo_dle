@@ -2,6 +2,38 @@
 
 {% block external_js %}
 <script src="{{ url_for('static', path='js/app.js')}}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const inputs = Array.from(document.querySelectorAll(".digit-input"));
+
+    if (inputs.length === 0) return;
+
+    inputs.forEach((input, index) => {
+        input.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "").slice(0, 1);
+
+            if (this.value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+                inputs[index + 1].select();
+            }
+        });
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Backspace" && this.value === "" && index > 0) {
+                inputs[index - 1].focus();
+            }
+
+            if (event.key === "ArrowLeft" && index > 0) {
+                inputs[index - 1].focus();
+            }
+
+            if (event.key === "ArrowRight" && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
 
 {% block additional_styles %}
@@ -11,12 +43,14 @@
         letter-spacing: -0.03em;
         margin-bottom: 0.3rem;
         font-size: 1.95rem;
+        text-align: center;
     }
 
     .game-subtitle {
         color: var(--text-muted);
         margin-bottom: 1.4rem;
         font-size: 0.98rem;
+        text-align: center;
     }
 
     .hero-panel {
@@ -25,7 +59,11 @@
         padding: 22px;
         box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
         border: 1px solid var(--card-border);
-        margin-bottom: 20px;
+    }
+
+    .board {
+        width: fit-content;
+        margin: 0 auto;
     }
 
     .board-row {
@@ -33,57 +71,46 @@
         grid-template-columns: repeat(4, 58px) 78px 78px;
         gap: 12px;
         align-items: center;
-        justify-content: center;
     }
 
     .board-header {
         margin-bottom: 14px;
     }
 
-    .secret-box {
+    .guess-row {
+        margin-bottom: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #243041;
+    }
+
+    .input-row {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #243041;
+    }
+
+    .secret-box,
+    .guess-digit,
+    .digit-input {
         width: 58px;
         height: 58px;
         border-radius: 16px;
         background: linear-gradient(180deg, var(--yellow-top), var(--yellow-bottom));
+        color: #111827;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.25rem;
         font-weight: 800;
-        color: #111827;
         box-shadow:
             inset 0 0 0 1px rgba(17, 24, 39, 0.06),
             0 6px 16px rgba(231, 201, 93, 0.18);
-    }
-
-    .header-label {
-        font-weight: 800;
-        font-size: 1.05rem;
-        text-align: center;
-    }
-
-    .bulls-label {
-        color: #86efac;
-    }
-
-    .cows-label {
-        color: #93c5fd;
     }
 
     .digit-input {
-        width: 58px;
-        height: 58px;
         border: none;
-        border-radius: 16px;
-        background: linear-gradient(180deg, var(--yellow-top), var(--yellow-bottom));
         text-align: center;
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #111827;
         outline: none;
-        box-shadow:
-            inset 0 0 0 1px rgba(17, 24, 39, 0.06),
-            0 6px 16px rgba(231, 201, 93, 0.18);
     }
 
     .digit-input:focus {
@@ -92,26 +119,20 @@
             0 0 0 4px rgba(124, 58, 237, 0.16);
     }
 
-    .guess-row {
-        margin-bottom: 12px;
-        padding: 10px 0;
-        border-top: 1px solid #243041;
+    .header-label {
+        font-weight: 800;
+        font-size: 1.05rem;
+        text-align: center;
     }
 
-    .guess-digit {
-        width: 58px;
-        height: 58px;
-        border-radius: 16px;
-        background: linear-gradient(180deg, var(--yellow-top), var(--yellow-bottom));
-        color: #111827;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        font-weight: 800;
-        box-shadow:
-            inset 0 0 0 1px rgba(17, 24, 39, 0.06),
-            0 6px 16px rgba(231, 201, 93, 0.18);
+    .bulls-label,
+    .bulls-value {
+        color: #86efac;
+    }
+
+    .cows-label,
+    .cows-value {
+        color: #93c5fd;
     }
 
     .score-value {
@@ -120,19 +141,12 @@
         text-align: center;
     }
 
-    .bulls-value {
-        color: #86efac;
-    }
-
-    .cows-value {
-        color: #93c5fd;
-    }
-
-    .guess-btn-wrap {
-        margin-top: 12px;
+    .button-row {
         display: flex;
         gap: 10px;
-        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin-top: 12px;
+        width: 268px;
     }
 
     .guess-btn {
@@ -151,24 +165,15 @@
         box-shadow: 0 8px 16px rgba(34, 197, 94, 0.18);
     }
 
-    .guess-btn-main:hover {
-        transform: translateY(-1px);
-    }
-
     .give-up-btn {
         background: linear-gradient(135deg, #7f1d1d, #dc2626);
         color: white;
         box-shadow: 0 8px 16px rgba(220, 38, 38, 0.18);
     }
 
+    .guess-btn-main:hover,
     .give-up-btn:hover {
         transform: translateY(-1px);
-        color: white;
-    }
-
-    .guess-btn:disabled,
-    .give-up-btn:disabled {
-        opacity: 0.75;
     }
 
     .locked-box {
@@ -179,6 +184,7 @@
         margin-bottom: 16px;
         font-weight: 600;
         font-size: 0.94rem;
+        text-align: center;
     }
 
     .error-box {
@@ -189,6 +195,7 @@
         margin-top: 16px;
         font-weight: 600;
         font-size: 0.94rem;
+        text-align: center;
     }
 
     .win-box {
@@ -199,6 +206,7 @@
         margin-top: 16px;
         font-weight: 700;
         font-size: 0.94rem;
+        text-align: center;
     }
 
     @media (max-width: 900px) {
@@ -207,11 +215,16 @@
             gap: 8px;
         }
 
-        .digit-input,
+        .secret-box,
         .guess-digit,
-        .secret-box {
+        .digit-input {
             width: 52px;
             height: 52px;
+        }
+
+        .button-row {
+            width: 232px;
+            flex-wrap: wrap;
         }
 
         .score-value,
@@ -224,7 +237,7 @@
 
 {% block subpage_content %}
 <div class="row justify-content-center">
-    <div class="col-xl-11 text-center">
+    <div class="col-xl-11">
         <h2 class="game-page-title">Daily Bulls and Cows</h2>
         <p class="game-subtitle">Guess the 4-digit number. All digits must be unique.</p>
 
@@ -237,59 +250,62 @@
                 </div>
             {% endif %}
 
-            <div class="board-row board-header ">
-                {% for i in range(4) %}
-                    <div class="secret-box">?</div>
-                {% endfor %}
-                <div class="header-label bulls-label">Bulls</div>
-                <div class="header-label cows-label">Cows</div>
+            <div class="board">
+                <div class="board-row board-header">
+                    {% for i in range(4) %}
+                        <div class="secret-box">?</div>
+                    {% endfor %}
+                    <div class="header-label bulls-label">Bulls</div>
+                    <div class="header-label cows-label">Cows</div>
+                </div>
+
+                {% if guesses %}
+                    {% for g in guesses %}
+                        <div class="board-row guess-row">
+                            {% for ch in g.guess_number %}
+                                <div class="guess-digit">{{ ch }}</div>
+                            {% endfor %}
+                            <div class="score-value bulls-value">{{ g.bulls }}</div>
+                            <div class="score-value cows-value">{{ g.cows }}</div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if locked %}
+                    <form method="POST" action="/app">
+                        <div class="board-row input-row">
+                            {% for i in range(4) %}
+                                <input type="text" class="digit-input" name="d{{ i }}" disabled>
+                            {% endfor %}
+                            <div></div>
+                            <div></div>
+                        </div>
+
+                        <div class="button-row">
+                            <button type="submit" name="action" value="guess" class="guess-btn guess-btn-main" disabled>Guess</button>
+                        </div>
+                    </form>
+                {% else %}
+                    <form method="POST" action="/app">
+                        <div class="board-row input-row">
+                            {% for i in range(4) %}
+                                <input type="text"
+                                    class="digit-input"
+                                    name="d{{ i }}"
+                                    maxlength="1"
+                                    value="{{ form_values['d' + i|string] if form_values else '' }}">
+                            {% endfor %}
+                            <div></div>
+                            <div></div>
+                        </div>
+
+                        <div class="button-row">
+                            <button type="submit" name="action" value="guess" class="guess-btn guess-btn-main">Guess</button>
+                            <button type="submit" name="action" value="giveup" class="guess-btn give-up-btn">Give Up</button>
+                        </div>
+                    </form>
+                {% endif %}
             </div>
-
-            {% if guesses %}
-                {% for g in guesses %}
-                    <div class="board-row guess-row">
-                        {% for ch in g.guess_number %}
-                            <div class="guess-digit">{{ ch }}</div>
-                        {% endfor %}
-                        <div class="score-value bulls-value">{{ g.bulls }}</div>
-                        <div class="score-value cows-value">{{ g.cows }}</div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            {% if locked %}
-                <form method="POST" action="/app">
-                    <div class="board-row">
-                        {% for i in range(4) %}
-                            <input type="text" class="digit-input" name="d{{ i }}" disabled>
-                        {% endfor %}
-                        <div></div>
-                        <div></div>
-                    </div>
-                    <div class="guess-btn-wrap"style="display: flex; justify-content: center;">
-                        <button type="submit" name="action" value="guess" class="guess-btn guess-btn-main" disabled>Guess</button>
-                    </div>
-                </form>
-            {% else %}
-                <form method="POST" action="/app">
-                    <div class="board-row">
-                        {% for i in range(4) %}
-                            <input type="text"
-                                class="digit-input"
-                                name="d{{ i }}"
-                                maxlength="1"
-                                value="{{ form_values['d' + i|string] if form_values else '' }}">
-                        {% endfor %}
-                        <div></div>
-                        <div></div>
-                    </div>
-
-                    <div class="guess-btn-wrap" style="display: flex; justify-content: center;">
-                        <button type="submit" name="action" value="guess" class="guess-btn guess-btn-main">Guess</button>
-                        <button type="submit" name="action" value="giveup" class="guess-btn give-up-btn">Give Up</button>
-                    </div>
-                </form>
-            {% endif %}
 
             {% if error %}
                 <div class="error-box">{{ error }}</div>
