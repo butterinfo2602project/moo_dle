@@ -351,3 +351,89 @@ async def nuke_data(db: SessionDep, user: AuthDep):
     db.commit()
     
     return RedirectResponse(url="/app", status_code=303)
+
+
+
+@router.get("/leaderboard", response_class=HTMLResponse)
+async def leaderboard_view(
+    request: Request,
+    user: AuthDep,
+    db: SessionDep
+):
+    #ensures that only games from today are considered 
+    latest_game = db.exec(
+        select(DailyGame).order_by(DailyGame.game_date.desc())
+    ).first()
+
+    daily_leaderboard = []
+
+    if latest_game:
+        daily_entries = db.exec(
+            select(Leaderboard).where(
+                Leaderboard.game_id == latest_game.id
+            )
+        ).all()
+
+        
+        def get_attempts(entry):
+            return entry.numAttempts
+
+        #sort ascending
+        daily_entries.sort(key=get_attempts)
+
+        
+        rank = 1
+        for entry in daily_entries:
+            daily_leaderboard.append({
+                "rank": rank,
+                "username": entry.username,
+                "attempts": entry.numAttempts
+            })
+            rank += 1
+
+
+    lifetime_entries = db.exec(select(Leaderboard)).all()
+
+    def get_wins(entry):
+        return entry.gamesWon
+
+    # sort by wins
+    lifetime_entries.sort(key=get_wins, reverse=True)
+
+    lifetime_leaderboard = []
+
+    rank = 1
+    for entry in lifetime_entries:
+        lifetime_leaderboard.append({
+            "rank": rank,
+            "username": entry.username,
+            "wins": entry.gamesWon
+        })
+        rank += 1
+
+
+    def get_wins(entry):
+        return entry["wins"]
+
+    lifetime_leaderboard.sort(key=get_wins, reverse=True)
+
+    # add ranking
+    ranked_lifetime = []
+    rank = 1
+    for entry in lifetime_leaderboard:
+        ranked_lifetime.append({
+            "rank": rank,
+            "username": entry["username"],
+            "wins": entry["wins"]
+        })
+        rank += 1
+
+    return templates.TemplateResponse(
+        request=request,
+        name="leaderboard.html",
+        context={
+            "user": user,
+            "daily_leaderboard": daily_leaderboard,
+            "lifetime_leaderboard": ranked_lifetime
+        }
+    )
