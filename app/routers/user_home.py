@@ -22,10 +22,10 @@ def calculate_bulls_and_cows(guess: str, secret: str) -> tuple[int, int]:
 
 
 def get_time_left():
-    # counts time until tomorrow
     now = datetime.now()
+
     tomorrow = datetime.combine(
-        date_type.today() + timedelta(days=1),
+        now.date() + timedelta(days=1),
         datetime.min.time()
     )
 
