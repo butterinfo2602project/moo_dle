@@ -3,23 +3,6 @@ from typing import Optional, List
 from datetime import datetime, date as date_type
 
 # this could be used to save history
-class GameBase(SQLModel):
-    user_id: int = Field(foreign_key="user.id")
-    date: datetime
-    numAttempts: int = 0
-    won: bool = False
-    attempted: bool = False
-    guess : int #updated in db evenytime a new guess is made, this is compaired to winning_code in winnign_game db to seee if won
-                #if not won then bulls and cows are updated
-
-                
-    bulls: int #updated in db evenytime a new guess is made
-    cows: int #updated in db evenytime a new guess is made
-
-
-class Game(GameBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-
 class DailyGame(SQLModel, table=True): #for secret number
     id: Optional[int] = Field(default=None, primary_key=True)
     game_date: date_type = Field(default_factory=date_type.today, unique=True, index=True)  # only once per day
