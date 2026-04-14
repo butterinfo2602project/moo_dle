@@ -8,7 +8,22 @@ from app.models import Leaderboard
 from . import router, templates
 from sqlmodel import select, delete
 from datetime import date as date_type, datetime, timedelta
+from zoneinfo import ZoneInfo
 import random
+
+# trinidad time
+TT_TZ = ZoneInfo("America/Port_of_Spain")
+
+
+# get trinidad now
+def get_tt_now():
+    return datetime.now(TT_TZ)
+
+
+# get trinidad today
+def get_tt_today():
+    return get_tt_now().date()
+
 
 def generate_secret_number() -> str:
     digits = random.sample(range(10), 4)
@@ -22,11 +37,13 @@ def calculate_bulls_and_cows(guess: str, secret: str) -> tuple[int, int]:
 
 
 def get_time_left():
-    now = datetime.now()
+    # trinidad time now
+    now = get_tt_now()
 
     tomorrow = datetime.combine(
-        now.date() + timedelta(days=1),
-        datetime.min.time()
+        get_tt_today() + timedelta(days=1),
+        datetime.min.time(),
+        tzinfo=TT_TZ
     )
 
     time_left = tomorrow - now
@@ -38,9 +55,10 @@ def get_time_left():
 
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
+
 def calculate_streak(db: SessionDep, user_id: int):
     streak = 0
-    check_date = date_type.today()
+    check_date = get_tt_today()
     
     while True:
         game = db.exec(
@@ -61,13 +79,14 @@ def calculate_streak(db: SessionDep, user_id: int):
     
     return streak
 
+
 @router.get("/app", response_class=HTMLResponse)
 async def user_home_view(
     request: Request,
     user: AuthDep,
     db: SessionDep
 ):
-    today = date_type.today()
+    today = get_tt_today()
     
     daily_game = db.exec(select(DailyGame).where(DailyGame.game_date == today)).first()
     if not daily_game:
@@ -161,7 +180,7 @@ async def make_guess(
     d2: int | None = Form(None),
     d3: int | None = Form(None)
 ):
-    today = date_type.today()
+    today = get_tt_today()
 
     daily_game = db.exec(select(DailyGame).where(DailyGame.game_date == today)).first()
     if not daily_game:
@@ -197,6 +216,7 @@ async def make_guess(
             }
         )
 
+    # give up btn
     if action == "giveup":
         user_game = handle_give_up(db, user)
 
@@ -213,6 +233,7 @@ async def make_guess(
             }
         )
 
+    # make sure all 4 boxes have a num
     if d0 is None or d1 is None or d2 is None or d3 is None:
         return templates.TemplateResponse(
             request=request,
@@ -303,7 +324,7 @@ async def make_guess(
 
 
 def handle_give_up(db: SessionDep, user: AuthDep):
-    today = date_type.today()
+    today = get_tt_today()
 
     daily_game = db.exec(
         select(DailyGame).where(DailyGame.game_date == today)
@@ -330,6 +351,7 @@ def handle_give_up(db: SessionDep, user: AuthDep):
     if user_game.completed:
         return user_game
 
+    # lock game after give up
     user_game.completed = True
     user_game.won = False
     user.numGames += 1
