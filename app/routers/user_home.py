@@ -38,6 +38,28 @@ def get_time_left():
 
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
+def calculate_streak(db: SessionDep, user_id: int):
+    streak = 0
+    check_date = date_type.today()
+    
+    while True:
+        game = db.exec(
+            select(UserGame)
+            .join(DailyGame, UserGame.daily_game_id == DailyGame.id)
+            .where(
+                UserGame.user_id == user_id,
+                DailyGame.game_date == check_date,
+                UserGame.won == True
+            )
+        ).first()
+        
+        if game:
+            streak += 1
+            check_date -= timedelta(days=1)  # i--
+        else:
+            break
+    
+    return streak
 
 @router.get("/app", response_class=HTMLResponse)
 async def user_home_view(
@@ -116,12 +138,14 @@ async def history_view(
         reverse=True
     )
 
+    streak = calculate_streak(db, user.id)
     return templates.TemplateResponse(
         request=request,
         name="history.html",
         context={
             "user": user,
-            "history_items": history_items
+            "history_items": history_items,
+            "streak": streak
         }
     )
 

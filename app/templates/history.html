@@ -100,9 +100,14 @@
 
 {% block subpage_content %}
 <div class="row justify-content-center">
-    <div class="col-xl-11">
+    <div class="col-xl-11 text-center">
         <h2 class="history-title">Game History</h2>
         <p class="history-subtitle">Your completed daily games.</p>
+        {% if streak > 0 %}
+            <p> {{ streak }} Day Streak!</p>
+        {% else %}
+            <p>Play to activate your streak!</p>
+        {% endif %}
 
         <div class="history-card">
             {% if history_items %}
